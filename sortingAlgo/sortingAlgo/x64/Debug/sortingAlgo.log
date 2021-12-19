@@ -1,0 +1,9 @@
+﻿  sort.cpp
+C:\Users\nadav\source\repos\sortingAlgo\sortingAlgo\sort.cpp(36,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\nadav\source\repos\sortingAlgo\sortingAlgo\sort.cpp(78,33): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\nadav\source\repos\sortingAlgo\sortingAlgo\sort.cpp(79,45): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+  sortingAlgo.vcxproj -> C:\Users\nadav\source\repos\sortingAlgo\x64\Debug\sortingAlgo.exe

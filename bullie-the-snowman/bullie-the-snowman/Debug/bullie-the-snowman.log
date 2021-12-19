@@ -1,0 +1,9 @@
+﻿  characters.cpp
+  game.cpp
+C:\Users\nadav\source\repos\bullie-the-snowman\bullie-the-snowman\game.cpp(83,10): warning C4476: 'printf' : unknown type field character '|' in format specifier
+C:\Users\nadav\source\repos\bullie-the-snowman\bullie-the-snowman\game.cpp(83,10): warning C4476: 'printf' : unknown type field character '~' in format specifier
+C:\Users\nadav\source\repos\bullie-the-snowman\bullie-the-snowman\game.cpp(85,10): warning C4476: 'printf' : unknown type field character '|' in format specifier
+C:\Users\nadav\source\repos\bullie-the-snowman\bullie-the-snowman\game.cpp(85,10): warning C4476: 'printf' : unknown type field character '~' in format specifier
+  main1.cpp
+  Generating Code...
+  bullie-the-snowman.vcxproj -> C:\Users\nadav\source\repos\bullie-the-snowman\Debug\bullie-the-snowman.exe

@@ -1,0 +1,3 @@
+﻿  main1.cpp
+C:\Users\nadav\source\repos\fuckingHermione\fuckingHermione\main1.cpp(42,7): warning C4101: 'cor': unreferenced local variable
+  fuckingHermione.vcxproj -> C:\Users\nadav\source\repos\fuckingHermione\Debug\fuckingHermione.exe
