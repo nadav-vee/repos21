@@ -47,7 +47,6 @@ class move:
         self.end = end
         self.piece = index
         self.color = color
-        self.move_id = id(self)
 
 class Piece:
     img_ind = -1
@@ -93,7 +92,7 @@ class Piece:
 
     def RemoveMove(self, move):
         for m in self.move_list:
-            if m.move_id == move.move_id:
+            if m.end == move.end:
                 self.move_list.remove(m)
 
     def getPiece(self):

@@ -75,8 +75,9 @@ class minMaxTree:
         self.root = _child
 
 
+
 class Board:
-    def __init__(self, rows, cols, turn):
+    def __init__(self, rows, cols, turn, is_board_tmp=False):
         self.rows = rows
         self.cols = cols
         self.currentColor = turn
@@ -94,6 +95,7 @@ class Board:
         self.b_checked = False
         self.TogglePawns = True
         self.boardScore = 0
+        self.is_board_tmp = is_board_tmp
 
         self.b_right_rook_moved = False
         self.b_left_rook_moved = False
@@ -104,32 +106,32 @@ class Board:
 
 
         self.board = [[0 for x in range(cols)] for _ in range(rows)]
+        if self.is_board_tmp == False:
+            self.board[0][0] = Rook(0,0,"b")
+            self.board[0][1] = Knight(0,1,"b")
+            self.board[0][2] = Bishop(0,2,"b")
+            self.board[0][3] = Queen(0,3,"b")
+            self.board[0][4] = King(0,4,"b")
+            self.board[0][5] = Bishop(0,5,"b")
+            self.board[0][6] = Knight(0,6,"b")
+            self.board[0][6] = Knight(0,6,"b")
+            self.board[0][7] = Rook(0,7,"b")
+            if self.TogglePawns:
+                for j in range(8):
+                    self.board[1][j] = Pawn(1, j, "b")
+            self.board[7][0] = Rook(7,0,"w")
+            self.board[7][1] = Knight(7,1,"w")
+            self.board[7][2] = Bishop(7,2,"w")
+            self.board[7][3] = Queen(7,3,"w")
+            self.board[7][4] = King(7,4,"w")
+            self.board[7][5] = Bishop(7,5,"w")
+            self.board[7][6] = Knight(7,6,"w")
+            self.board[7][7] = Rook(7,7,"w")
+            if self.TogglePawns:
+                for j in range(8):
+                    self.board[6][j] = Pawn(6, j, "w")
 
-        self.board[0][0] = Rook(0,0,"b")
-        self.board[0][1] = Knight(0,1,"b")
-        self.board[0][2] = Bishop(0,2,"b")
-        self.board[0][3] = Queen(0,3,"b")
-        self.board[0][4] = King(0,4,"b")
-        self.board[0][5] = Bishop(0,5,"b")
-        self.board[0][6] = Knight(0,6,"b")
-        self.board[0][6] = Knight(0,6,"b")
-        self.board[0][7] = Rook(0,7,"b")
-        if self.TogglePawns:
-            for j in range(8):
-                self.board[1][j] = Pawn(1, j, "b")
-        self.board[7][0] = Rook(7,0,"w")
-        self.board[7][1] = Knight(7,1,"w")
-        self.board[7][2] = Bishop(7,2,"w")
-        self.board[7][3] = Queen(7,3,"w")
-        self.board[7][4] = King(7,4,"w")
-        self.board[7][5] = Bishop(7,5,"w")
-        self.board[7][6] = Knight(7,6,"w")
-        self.board[7][7] = Rook(7,7,"w")
-        if self.TogglePawns:
-            for j in range(8):
-                self.board[6][j] = Pawn(6, j, "w")
-
-        self.update_init_moves()
+            self.update_init_moves()
 
     def evaluate_move(self, move):
         move_score = 0
@@ -145,9 +147,10 @@ class Board:
         for i in range(self.rows):
             for j in range(self.cols):
                 if self.board[i][j] == 0:
-                    board.board[i][j] = 0
+                    continue
                 else:
                     self.board[i][j].copy(board)
+
 
     def draw(self, win):
         for i in range(self.rows):
@@ -304,7 +307,7 @@ class Board:
         return pinned_pieces
 
     def is_move_dangerous(self, move, color):
-        tmp = Board(8,8,"w")
+        tmp = Board(8,8,"w", is_board_tmp=True)
         self.CopyTo(tmp)
         tmp.move(move)
         tmp.update_init_moves()
@@ -349,7 +352,7 @@ class Board:
         return None
 
     def get_danger_moves_without_piece(self, by_piece):
-        tmp = Board(8,8,self.currentColor)
+        tmp = Board(8,8,self.currentColor, is_board_tmp=True)
         self.CopyTo(tmp)
         piece_to_remove = tmp.board[by_piece.row][by_piece.col]
         tmp.remove_piece_from_board(piece_to_remove)
@@ -358,7 +361,7 @@ class Board:
         return moves_without_piece
 
     def get_danger_moves_with_piece_in_new_pos(self, by_piece, move):
-        tmp = Board(8,8, self.currentColor)
+        tmp = Board(8,8, self.currentColor, is_board_tmp=True)
         self.CopyTo(tmp)
         tmp.move(move)
         tmp.update_init_moves()
@@ -366,14 +369,14 @@ class Board:
         return new_moves
 
     def is_checked_with_piece_in_new_pos(self, color, move):
-        tmp = Board(8,8, self.currentColor)
+        tmp = Board(8,8, self.currentColor, is_board_tmp=True)
         self.CopyTo(tmp)
         tmp.move(move)
         tmp.update_init_moves()
         return tmp.is_checked(color)
 
     def get_all_moves_without_kings(self):
-        tmp = Board(8,8,self.currentColor)
+        tmp = Board(8,8,self.currentColor, is_board_tmp=True)
         self.CopyTo(tmp)
         tmp_white_king = tmp.get_king("w")
         tmp_black_king = tmp.get_king("b")

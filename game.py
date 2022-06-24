@@ -271,4 +271,3 @@ class game:
                 if event.type == pygame.KEYUP:
                     bo = Board(8,8, "w")
                     p1Time = 60 * 15
-

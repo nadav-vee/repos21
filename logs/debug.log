@@ -1,0 +1,5 @@
+2022-06-24 18:26:09,396 - __main__ 
+ ERROR - something's wrong with 127.0.0.1:8820. Exception is [WinError 10061] No connection could be made because the target machine actively refused it
+
+
+

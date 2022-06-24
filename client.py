@@ -3,45 +3,114 @@ from pygame.locals import *
 import game
 import constants as c
 import os
+import socket
+import logging
 
-class main_screen:
+class Client:
     def __init__(self):
-        self.pvp_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "pvp.png")), (c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/2))
-        self.ai_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "ai.png")), (c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/2))
+
+        # pygame
         self.win = pygame.display.set_mode((c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT))
-        self.clientg = game.game(self.win)
-        self.pvp_hover = False
-        self.ai_hover = False
-        self.pvp_rect = (0,0,c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/2)
-        self.ai_rect = (0, c.BOARD_ALT_HEIGHT/2,c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/2)
         self.font = pygame.font.SysFont("Arial", 30)
+
+        # game options
+        self.localgame = game.game(self.win)
+
+        # client general
+        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.IP = "127.0.0.1"
+        self.PORT = 8820
+        self.MAX_MSG_LENGTH = 1024
+
+        # client logging
+        #   Create a custom logger
+        self.logger = logging.getLogger(__name__)
+        #   Create handlers
+        e_handler = logging.FileHandler('logs\error.log')
+        e_handler.setLevel(logging.ERROR)
+
+        i_handler = logging.FileHandler('logs\debug.log')
+        i_handler.setLevel(logging.DEBUG)
+        #   Create formatters and add it to handlers
+        e_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        e_handler.setFormatter(e_format)
+
+        i_format = logging.Formatter('%(asctime)s - %(name)s \n %(levelname)s - %(message)s\n\n\n')
+        i_handler.setFormatter(i_format)
+        #   Add handlers to the logger
+        self.logger.addHandler(e_handler)
+        self.logger.addHandler(i_handler)
+
+        # design
+        self.pvp_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "pvp.png")), (c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/3))
+        self.ai_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "ai.png")), (c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/3))
+        self.online_img = pygame.transform.scale(pygame.image.load(os.path.join("Assets", "internet.png")), (c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/3))
+        self.pvp_hover = False
+        self.online_hover = False
+        self.ai_hover = False
+        self.pvp_rect = (0, 0, c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/3)
+        self.ai_rect = (0, c.BOARD_ALT_HEIGHT/3, c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/3)
+        self.online_rect = (0, c.BOARD_ALT_HEIGHT*2/3, c.BOARD_ALT_WIDTH, c.BOARD_ALT_HEIGHT/3)
         self.to_choose = False
+        self.toggle_ai = False
         self.choose_txt = self.font.render("choose color!", True, (255, 255, 255))
         self.black_txt = self.font.render("black", True, (255, 255, 255))
         self.white_txt = self.font.render("white", True, (255, 255, 255))
-        self.black_txt_hitbox = (c.BOARD_ALT_WIDTH/2 - 40, c.BOARD_ALT_HEIGHT/2 - 100, 50, 30)
-        self.white_txt_hitbox = (c.BOARD_ALT_WIDTH/2 + 40, c.BOARD_ALT_HEIGHT/2 - 100, 50, 30)
+        self.black_txt_hitbox = (c.BOARD_ALT_WIDTH/3 - 70, c.BOARD_ALT_HEIGHT/3 - 100, 50, 30)
+        self.white_txt_hitbox = (c.BOARD_ALT_WIDTH/3, c.BOARD_ALT_HEIGHT/3 - 100, 50, 30)
 
+    def __del__(self):
+        self.conn.close()
 
     def redraw(self, win):
         win.blit(self.pvp_img, (0,0))
-        win.blit(self.ai_img, (0, c.BOARD_ALT_HEIGHT/2))
+        win.blit(self.ai_img, (0, c.BOARD_ALT_HEIGHT/3))
+        win.blit(self.online_img, (0, c.BOARD_ALT_HEIGHT*2/3))
         if self.pvp_hover:
             pygame.draw.rect(win, [255,255,255], self.pvp_rect, 5)
-        if self.ai_hover:
+        elif self.ai_hover:
             pygame.draw.rect(win, [255,255,255], self.ai_rect, 5)
+        elif self.online_hover:
+            pygame.draw.rect(win, [255,255,255], self.online_rect, 5)
         if self.to_choose:
-            win.blit(self.choose_txt, (c.BOARD_ALT_WIDTH/2 - 30, c.BOARD_ALT_HEIGHT/2))
-            win.blit(self.black_txt, (c.BOARD_ALT_WIDTH/2 - 70, c.BOARD_ALT_HEIGHT/2 - 100))
-            win.blit(self.white_txt, (c.BOARD_ALT_WIDTH/2 + 10, c.BOARD_ALT_HEIGHT/2 - 100))
+            win.blit(self.choose_txt, (c.BOARD_ALT_WIDTH/3 - 80, c.BOARD_ALT_HEIGHT/3))
+            win.blit(self.black_txt, (c.BOARD_ALT_WIDTH/3 - 70, c.BOARD_ALT_HEIGHT/3 - 100))
+            win.blit(self.white_txt, (c.BOARD_ALT_WIDTH/3, c.BOARD_ALT_HEIGHT/3 - 100))
         pygame.display.update()
 
 
     def intersects(self, rect, pos):
-        if pos[0] >= rect[0] and pos[0] <= rect[2] and pos[1] >= rect[1] and pos[1] <= rect[3]:
+        if pos[0] >= rect[0] and pos[0] <= (rect[2] + rect[0]) and pos[1] >= rect[1] and pos[1] <= (rect[3] + rect[1]):
             return True
         return False
 
+    def online_start(self):
+        try:
+            self.conn.connect((self.IP, self.PORT))
+            while True:
+                msg = input("enter message\n")
+                self.conn.send(msg.encode())
+                data = self.conn.recv(self.MAX_MSG_LENGTH).decode()
+                print("THE SERVER SENT: " + data)
+                if data == "bye":
+                    break
+        except Exception as e:
+            self.logger.error("something's wrong with %s:%d. Exception is %s" % (self.IP, self.PORT, e))
+            self.conn.close()
+
+    def debug_start(self):
+        try:
+            self.conn.connect((self.IP, self.PORT))
+            while True:
+                msg = input("enter message\n")
+                self.conn.send(msg.encode())
+                data = self.conn.recv(self.MAX_MSG_LENGTH).decode()
+                print("THE SERVER SENT: " + data)
+                if data == "bye":
+                    break
+        except Exception as e:
+            self.logger.error("something's wrong with %s:%d. Exception is %s" % (self.IP, self.PORT, e))
+            self.conn.close()
 
     def start(self):
         run = True
@@ -59,74 +128,42 @@ class main_screen:
 
                 if event.type == pygame.MOUSEMOTION:
                     if not self.to_choose:
-                        pos = pygame.mouse.get_pos()
-                        if self.intersects(self.pvp_rect, pos):
-                            self.pvp_hover = True
-                        else:
-                            self.pvp_hover = False
-                        pos = pygame.mouse.get_pos()
+                        pos = pygame.mouse.get_pos(self.win)
                         if self.intersects(self.ai_rect, pos):
                             self.ai_hover = True
                         else:
                             self.ai_hover = False
+                        if self.intersects(self.pvp_rect, pos):
+                            self.pvp_hover = True
+                        else:
+                            self.pvp_hover = False
+                        if self.intersects(self.online_rect, pos):
+                            self.online_hover = True
+                        else:
+                            self.online_hover = False
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    pos = pygame.mouse.get_pos()
+                    pos = pygame.mouse.get_pos(self.win)
                     if not self.to_choose:
                         if self.intersects(self.pvp_rect, pos):
-                            self.clientg.startAI("w")
+                            #self.clientg.startAI("w")
+                            self.localgame.start()
                         if self.intersects(self.ai_rect, pos):
-                            self.to_choose = True
+                            if self.toggle_ai:
+                                self.to_choose = True
+                        if self.intersects(self.online_rect, pos):
+                            self.debug_start()
                     else:
                         if self.intersects(self.white_txt_hitbox, pos):
-                            self.clientg.startAI("w")
+                            self.localgame.startAI("w")
                         if self.intersects(self.black_txt_hitbox, pos):
-                            self.clientg.startAI("b")
+                            self.localgame.startAI("b")
                         self.to_choose = False
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-
-
-                        import socket
-
-my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-my_socket.connect(("127.0.0.1", 5555))
-msg = "hello"
-while True:
-    my_socket.send(msg.encode())
-    data = my_socket.recv(1024).decode()
-    print("THE SERVER SENT: " + data)
-    if (data == "BYE!!!" or data == "KILL SERVER!!!"):
-        break
-    msg = input("Please enter your message\n")
-
-
-my_socket.close()
-
-
-'''
-
-
-
-
+pygame.init()
+pygame.font.init()
+m = Client()
+m.start()
 
 
 '''
